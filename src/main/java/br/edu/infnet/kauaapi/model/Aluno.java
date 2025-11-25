@@ -6,15 +6,22 @@ public class Aluno {
     private String nome;
     private boolean bolsista;
     private double notaFinal;
+    private SituacaoAluno situacao;
 
     public Aluno() {
+        this.situacao = SituacaoAluno.CURSANDO;
+    }
+
+    public Aluno(int matricula, String nome) {
+        this();
+        this.matricula = matricula;
+        this.nome = nome;
     }
 
     public Aluno(int matricula, String nome, boolean bolsista, double notaFinal) {
-        this.matricula = matricula;
-        this.nome = nome;
+        this(matricula, nome);
         this.bolsista = bolsista;
-        this.notaFinal = notaFinal;
+        setNotaFinal(notaFinal);
     }
 
     public int getMatricula() {
@@ -46,20 +53,62 @@ public class Aluno {
     }
 
     public void setNotaFinal(double notaFinal) {
-        this.notaFinal = notaFinal;
+        if (notaFinal >= 0 && notaFinal <= 10) {
+            this.notaFinal = notaFinal;
+            this.situacao = calcularSituacao();
+        }
+    }
+
+    public SituacaoAluno getSituacao() {
+        return situacao;
+    }
+
+    public void setSituacao(SituacaoAluno situacao) {
+        this.situacao = situacao;
     }
 
     public void exibirResultadoFinal() {
-        String resultado = calcularResultado();
+        exibirResultadoFinal(false);
+    }
+
+    public void exibirResultadoFinal(boolean exibirDetalhes) {
         System.out.println("\n=== Resultado Final do Aluno ===");
         System.out.println("Matrícula: " + matricula);
         System.out.println("Nome: " + nome);
         System.out.println("Bolsista: " + (bolsista ? "Sim" : "Não"));
-        System.out.println("Nota Final: " + notaFinal);
-        System.out.println("Situação: " + resultado);
+        System.out.printf("Nota Final: %.2f%n", notaFinal);
+        System.out.println("Situação: " + situacao);
+
+        if (exibirDetalhes && situacao == SituacaoAluno.EM_RECUPERACAO) {
+            System.out.println("Você precisa de pelo menos 5.0 na prova de recuperação");
+        }
     }
 
-    private String calcularResultado() {
-        return notaFinal >= 6 ? "Aprovado" : "Reprovado";
+    private SituacaoAluno calcularSituacao() {
+        if (notaFinal >= 7.0) {
+            return SituacaoAluno.APROVADO;
+        } else if (notaFinal >= 4.0) {
+            return SituacaoAluno.EM_RECUPERACAO;
+        } else {
+            return SituacaoAluno.REPROVADO;
+        }
+    }
+
+    public double calcularNotaNecessaria() {
+        return calcularNotaNecessaria(6.0);
+    }
+
+    public double calcularNotaNecessaria(double mediaDesejada) {
+        if (notaFinal >= mediaDesejada) {
+            return 0.0;
+        }
+        return mediaDesejada - notaFinal;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Aluno[%d] %s - Nota: %.2f - %s%s",
+                matricula, nome, notaFinal, situacao,
+                bolsista ? " (Bolsista)" : "");
     }
 }

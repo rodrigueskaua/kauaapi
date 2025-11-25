@@ -3,6 +3,8 @@ package br.edu.infnet.kauaapi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import br.edu.infnet.kauaapi.model.Aluno;
+import br.edu.infnet.kauaapi.model.Disciplina;
+import br.edu.infnet.kauaapi.model.SituacaoAluno;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class KauaapiApplication {
 
         Scanner sc = new Scanner(System.in);
         List<Aluno> alunos = new ArrayList<>();
+        List<Disciplina> disciplinas = new ArrayList<>();
 
         int opcao;
 
@@ -26,7 +29,11 @@ public class KauaapiApplication {
             System.out.println("2. Listar alunos cadastrados");
             System.out.println("3. Calcular média da turma");
             System.out.println("4. Buscar aluno por matrícula");
-            System.out.println("5. Sair");
+            System.out.println("5. Cadastrar disciplina");
+            System.out.println("6. Listar disciplinas");
+            System.out.println("7. Matricular aluno em disciplina");
+            System.out.println("8. Exibir relatório de disciplina");
+            System.out.println("9. Sair");
             System.out.print("Escolha uma opção: ");
             opcao = sc.nextInt();
             sc.nextLine();
@@ -118,14 +125,130 @@ public class KauaapiApplication {
                     break;
 
                 case 5:
+                    System.out.print("Informe o código da disciplina: ");
+                    String codigo = sc.nextLine();
+
+                    boolean codigoExiste = false;
+                    for (Disciplina d : disciplinas) {
+                        if (d.getCodigo().equalsIgnoreCase(codigo)) {
+                            System.out.println("Código de disciplina já cadastrado!");
+                            codigoExiste = true;
+                            break;
+                        }
+                    }
+                    if (codigoExiste) break;
+
+                    System.out.print("Informe o nome da disciplina: ");
+                    String nomeDisciplina = sc.nextLine();
+
+                    System.out.print("Informe o nome do professor: ");
+                    String professor = sc.nextLine();
+
+                    System.out.print("Informe a carga horária: ");
+                    int cargaHoraria = sc.nextInt();
+                    sc.nextLine();
+
+                    Disciplina disciplina = new Disciplina(codigo, nomeDisciplina, professor, cargaHoraria);
+                    disciplinas.add(disciplina);
+
+                    System.out.println("Disciplina cadastrada com sucesso!");
+                    System.out.println(disciplina);
+                    break;
+
+                case 6:
+                    if (disciplinas.isEmpty()) {
+                        System.out.println("Nenhuma disciplina cadastrada.");
+                    } else {
+                        System.out.println("\n=== Lista de Disciplinas ===");
+                        for (Disciplina d : disciplinas) {
+                            System.out.println(d);
+                        }
+                    }
+                    break;
+
+                case 7:
+                    if (disciplinas.isEmpty()) {
+                        System.out.println("Nenhuma disciplina cadastrada.");
+                        break;
+                    }
+                    if (alunos.isEmpty()) {
+                        System.out.println("Nenhum aluno cadastrado.");
+                        break;
+                    }
+
+                    System.out.println("\n=== Disciplinas disponíveis ===");
+                    for (int i = 0; i < disciplinas.size(); i++) {
+                        System.out.printf("%d. %s%n", i + 1, disciplinas.get(i));
+                    }
+
+                    System.out.print("Escolha o número da disciplina: ");
+                    int numDisciplina = sc.nextInt();
+                    sc.nextLine();
+
+                    if (numDisciplina < 1 || numDisciplina > disciplinas.size()) {
+                        System.out.println("Disciplina inválida!");
+                        break;
+                    }
+
+                    Disciplina disciplinaSelecionada = disciplinas.get(numDisciplina - 1);
+
+                    System.out.println("\n=== Alunos disponíveis ===");
+                    for (int i = 0; i < alunos.size(); i++) {
+                        Aluno a = alunos.get(i);
+                        System.out.printf("%d. %s (Matrícula: %d)%n", i + 1, a.getNome(), a.getMatricula());
+                    }
+
+                    System.out.print("Escolha o número do aluno: ");
+                    int numAluno = sc.nextInt();
+                    sc.nextLine();
+
+                    if (numAluno < 1 || numAluno > alunos.size()) {
+                        System.out.println("Aluno inválido!");
+                        break;
+                    }
+
+                    Aluno alunoSelecionado = alunos.get(numAluno - 1);
+                    disciplinaSelecionada.matricularAluno(alunoSelecionado);
+                    break;
+
+                case 8:
+                    if (disciplinas.isEmpty()) {
+                        System.out.println("Nenhuma disciplina cadastrada.");
+                        break;
+                    }
+
+                    System.out.println("\n=== Disciplinas disponíveis ===");
+                    for (int i = 0; i < disciplinas.size(); i++) {
+                        System.out.printf("%d. %s%n", i + 1, disciplinas.get(i));
+                    }
+
+                    System.out.print("Escolha o número da disciplina para exibir o relatório: ");
+                    int numDisciplinaRelatorio = sc.nextInt();
+                    sc.nextLine();
+
+                    if (numDisciplinaRelatorio < 1 || numDisciplinaRelatorio > disciplinas.size()) {
+                        System.out.println("Disciplina inválida!");
+                        break;
+                    }
+
+                    Disciplina disciplinaRelatorio = disciplinas.get(numDisciplinaRelatorio - 1);
+
+                    System.out.print("Deseja incluir a lista de alunos no relatório? (true/false): ");
+                    boolean incluirAlunos = sc.nextBoolean();
+                    sc.nextLine();
+
+                    disciplinaRelatorio.exibirRelatorio(incluirAlunos);
+                    break;
+
+                case 9:
                     System.out.println("Encerrando o sistema.");
                     break;
 
                 default:
-                    System.out.println("Opção inválida! Escolha entre 1 e 5.");
+                    System.out.println("Opção inválida! Escolha entre 1 e 9.");
             }
 
-        } while (opcao != 5);
+        } while (opcao != 9);
 
         sc.close();
     }
