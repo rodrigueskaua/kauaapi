@@ -3,16 +3,19 @@ package br.edu.infnet.kauaapi.util;
 import br.edu.infnet.kauaapi.exception.ArquivoException;
 import br.edu.infnet.kauaapi.model.Aluno;
 import br.edu.infnet.kauaapi.model.Disciplina;
+import br.edu.infnet.kauaapi.model.Professor;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class GerenciadorArquivos {
 
     private static final String DIRETORIO_DADOS = "dados/";
     private static final String ARQUIVO_ALUNOS = DIRETORIO_DADOS + "alunos.txt";
     private static final String ARQUIVO_DISCIPLINAS = DIRETORIO_DADOS + "disciplinas.txt";
+    private static final String ARQUIVO_PROFESSORES = DIRETORIO_DADOS + "professores.txt";
     private static final String ARQUIVO_LOG = DIRETORIO_DADOS + "sistema.log";
 
     public GerenciadorArquivos() {
@@ -32,7 +35,7 @@ public class GerenciadorArquivos {
             writer = new BufferedWriter(new FileWriter(ARQUIVO_ALUNOS));
 
             for (Aluno aluno : alunos) {
-                String linha = String.format("%d;%s;%b;%.2f",
+                String linha = String.format(Locale.US, "%d;%s;%b;%.2f",
                         aluno.getMatricula(),
                         aluno.getNome(),
                         aluno.isBolsista(),
@@ -196,6 +199,94 @@ public class GerenciadorArquivos {
         }
 
         return disciplinas;
+    }
+
+    public void salvarProfessores(List<Professor> professores) throws ArquivoException {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(ARQUIVO_PROFESSORES));
+
+            for (Professor professor : professores) {
+                String linha = String.format(Locale.US, "%d;%s;%s;%s;%s",
+                        professor.getId(),
+                        professor.getNome(),
+                        professor.getEmail() != null ? professor.getEmail() : "",
+                        professor.getTelefone() != null ? professor.getTelefone() : "",
+                        professor.getEspecialidade() != null ? professor.getEspecialidade() : "");
+                writer.write(linha);
+                writer.newLine();
+            }
+
+            registrarLog("Professores salvos com sucesso. Total: " + professores.size());
+
+        } catch (IOException e) {
+            throw new ArquivoException("Erro ao salvar professores no arquivo", e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    System.err.println("Erro ao fechar arquivo: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    public List<Professor> carregarProfessores() throws ArquivoException {
+        List<Professor> professores = new ArrayList<>();
+        BufferedReader reader = null;
+
+        try {
+            File arquivo = new File(ARQUIVO_PROFESSORES);
+            if (!arquivo.exists()) {
+                registrarLog("Arquivo de professores não encontrado. Retornando lista vazia.");
+                return professores;
+            }
+
+            reader = new BufferedReader(new FileReader(arquivo));
+            String linha;
+            int linhaNumero = 0;
+
+            while ((linha = reader.readLine()) != null) {
+                linhaNumero++;
+                try {
+                    String[] dados = linha.split(";");
+
+                    if (dados.length != 5) {
+                        throw new IllegalArgumentException("Formato inválido na linha " + linhaNumero);
+                    }
+
+                    int id = Integer.parseInt(dados[0]);
+                    String nome = dados[1];
+                    String email = dados[2].isEmpty() ? null : dados[2];
+                    String telefone = dados[3].isEmpty() ? null : dados[3];
+                    String especialidade = dados[4].isEmpty() ? null : dados[4];
+
+                    Professor professor = new Professor(id, nome, email, telefone, especialidade);
+                    professores.add(professor);
+
+                } catch (Exception e) {
+                    System.err.println("Erro ao processar linha " + linhaNumero + ": " + e.getMessage());
+                }
+            }
+
+            registrarLog("Professores carregados com sucesso. Total: " + professores.size());
+
+        } catch (FileNotFoundException e) {
+            throw new ArquivoException("Arquivo de professores não encontrado: " + ARQUIVO_PROFESSORES, e);
+        } catch (IOException e) {
+            throw new ArquivoException("Erro ao ler arquivo de professores", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    System.err.println("Erro ao fechar arquivo: " + e.getMessage());
+                }
+            }
+        }
+
+        return professores;
     }
 
     public void registrarLog(String mensagem) {

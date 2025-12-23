@@ -30,6 +30,7 @@ public class KauaapiApplication {
         try {
             alunos = gerenciador.carregarAlunos();
             disciplinas = gerenciador.carregarDisciplinas();
+            professores = gerenciador.carregarProfessores();
             System.out.println("Dados carregados com sucesso!");
         } catch (ArquivoException e) {
             System.out.println("Aviso: " + e.getMessage());
@@ -123,11 +124,11 @@ public class KauaapiApplication {
                         break;
 
                     case 14:
-                        salvarDados(alunos, disciplinas);
+                        salvarDados(alunos, disciplinas, professores);
                         break;
 
                     case 15:
-                        carregarDados(alunos, disciplinas);
+                        carregarDados(alunos, disciplinas, professores);
                         break;
 
                     case 16:
@@ -138,7 +139,7 @@ public class KauaapiApplication {
                         System.out.println("Deseja salvar os dados antes de sair? (s/n): ");
                         String resposta = sc.nextLine();
                         if (resposta.equalsIgnoreCase("s")) {
-                            salvarDados(alunos, disciplinas);
+                            salvarDados(alunos, disciplinas, professores);
                         }
                         System.out.println("Encerrando o sistema.");
                         break;
@@ -445,27 +446,31 @@ public class KauaapiApplication {
         professorSelecionado.adicionarDisciplina(disciplinaSelecionada);
     }
 
-    private static void salvarDados(List<Aluno> alunos, List<Disciplina> disciplinas) {
+    private static void salvarDados(List<Aluno> alunos, List<Disciplina> disciplinas, List<Professor> professores) {
         try {
             gerenciador.salvarAlunos(alunos);
             gerenciador.salvarDisciplinas(disciplinas);
+            gerenciador.salvarProfessores(professores);
             System.out.println("Dados salvos com sucesso!");
         } catch (ArquivoException e) {
             System.out.println("Erro ao salvar dados: " + e.getMessage());
         }
     }
 
-    private static void carregarDados(List<Aluno> alunos, List<Disciplina> disciplinas) {
+    private static void carregarDados(List<Aluno> alunos, List<Disciplina> disciplinas, List<Professor> professores) {
         try {
             alunos.clear();
             disciplinas.clear();
+            professores.clear();
 
             alunos.addAll(gerenciador.carregarAlunos());
             disciplinas.addAll(gerenciador.carregarDisciplinas());
+            professores.addAll(gerenciador.carregarProfessores());
 
             System.out.println("Dados carregados com sucesso!");
             System.out.println("Alunos: " + alunos.size());
             System.out.println("Disciplinas: " + disciplinas.size());
+            System.out.println("Professores: " + professores.size());
         } catch (ArquivoException e) {
             System.out.println("Erro ao carregar dados: " + e.getMessage());
         }
