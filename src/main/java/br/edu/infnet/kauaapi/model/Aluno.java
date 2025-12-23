@@ -1,21 +1,23 @@
 package br.edu.infnet.kauaapi.model;
 
-public class Aluno {
+import br.edu.infnet.kauaapi.exception.NotaInvalidaException;
+
+public class Aluno extends Pessoa implements Avaliavel {
 
     private int matricula;
-    private String nome;
     private boolean bolsista;
     private double notaFinal;
     private SituacaoAluno situacao;
 
     public Aluno() {
+        super();
         this.situacao = SituacaoAluno.CURSANDO;
     }
 
     public Aluno(int matricula, String nome) {
-        this();
+        super(matricula, nome);
         this.matricula = matricula;
-        this.nome = nome;
+        this.situacao = SituacaoAluno.CURSANDO;
     }
 
     public Aluno(int matricula, String nome, boolean bolsista, double notaFinal) {
@@ -24,20 +26,19 @@ public class Aluno {
         setNotaFinal(notaFinal);
     }
 
+    public Aluno(int matricula, String nome, String email, String telefone, boolean bolsista) {
+        super(matricula, nome, email, telefone);
+        this.matricula = matricula;
+        this.bolsista = bolsista;
+        this.situacao = SituacaoAluno.CURSANDO;
+    }
+
     public int getMatricula() {
         return matricula;
     }
 
     public void setMatricula(int matricula) {
         this.matricula = matricula;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public boolean isBolsista() {
@@ -67,6 +68,31 @@ public class Aluno {
         this.situacao = situacao;
     }
 
+    @Override
+    public double calcularMedia() {
+        return this.notaFinal;
+    }
+
+    @Override
+    public SituacaoAluno obterSituacao() {
+        return this.situacao;
+    }
+
+    @Override
+    public void registrarNota(double nota) {
+        setNotaFinal(nota);
+    }
+
+    @Override
+    public void exibirInformacoes() {
+        exibirResultadoFinal(false);
+    }
+
+    @Override
+    public String getTipo() {
+        return "Aluno";
+    }
+
     public void exibirResultadoFinal() {
         exibirResultadoFinal(false);
     }
@@ -74,7 +100,8 @@ public class Aluno {
     public void exibirResultadoFinal(boolean exibirDetalhes) {
         System.out.println("\n=== Resultado Final do Aluno ===");
         System.out.println("Matrícula: " + matricula);
-        System.out.println("Nome: " + nome);
+        System.out.println("Nome: " + getNome());
+        System.out.println("Email: " + (email != null ? email : "N/A"));
         System.out.println("Bolsista: " + (bolsista ? "Sim" : "Não"));
         System.out.printf("Nota Final: %.2f%n", notaFinal);
         System.out.println("Situação: " + situacao);
@@ -108,7 +135,7 @@ public class Aluno {
     @Override
     public String toString() {
         return String.format("Aluno[%d] %s - Nota: %.2f - %s%s",
-                matricula, nome, notaFinal, situacao,
+                matricula, getNome(), notaFinal, situacao,
                 bolsista ? " (Bolsista)" : "");
     }
 }

@@ -3,7 +3,7 @@ package br.edu.infnet.kauaapi.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Disciplina {
+public class Disciplina implements Relatoravel {
 
     private String codigo;
     private String nome;
@@ -126,6 +126,13 @@ public class Disciplina {
                 System.out.println("  " + aluno);
             }
         }
+    }
+
+    @Override
+    public String gerarResumo() {
+        return String.format("Disciplina %s: %s - Prof. %s - %d alunos - Média: %.2f",
+                codigo, nome, professor != null ? professor : "N/A",
+                alunosMatriculados.size(), calcularMediaDisciplina());
     }
 
     @Override
